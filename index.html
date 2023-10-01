@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador de Palabras</title>
+</head>
+<body>
+<h1>Buscador de Palabras</h1>
+<form id="searchForm">
+    <label for="letters">Letters:</label>
+    <input type="text" id="letters" name="letters" required><br><br>
+
+    <label for="length">Length:</label>
+    <input type="number" id="length" name="length" required><br><br>
+
+    <div id="letterTotalsInput">
+        <label>Letter Totals:</label><br>
+        <div class="letterTotalRow">
+            <input type="text" class="letterTotalLetter" placeholder="Letter">
+            <input type="number" class="letterTotalTotal" placeholder="Total">
+            <button type="button" class="removeButton">-</button>
+        </div>
+    </div>
+
+    <button type="button" id="addLetterTotal">+ Agregar Letter Total</button><br><br>
+
+    <div id="letterPositionsInput">
+        <label>Letter Positions:</label><br>
+        <div class="letterPositionRow">
+            <input type="text" class="letterPositionLetter" placeholder="Letter">
+            <input type="number" class="letterPositionPosition" placeholder="Position">
+            <button type="button" class="removeButton">-</button>
+        </div>
+    </div>
+
+    <button type="button" id="addLetterPosition">+ Agregar Letter Position</button><br><br>
+
+    <button type="button" id="searchButton">Buscar</button>
+</form>
+
+<table id="resultTable" style="display: none;">
+    <thead>
+    <tr>
+        <th>Palabra</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<script>
+        const searchForm = document.getElementById("searchForm");
+        const searchButton = document.getElementById("searchButton");
+        const addLetterTotalButton = document.getElementById("addLetterTotal");
+        const addLetterPositionButton = document.getElementById("addLetterPosition");
+        const resultTable = document.getElementById("resultTable").getElementsByTagName('tbody')[0];
+
+        addLetterTotalButton.addEventListener("click", () => {
+            const letterTotalsInput = document.getElementById("letterTotalsInput");
+            const row = document.createElement("div");
+            row.classList.add("letterTotalRow");
+            row.innerHTML = `
+                <input type="text" class="letterTotalLetter" placeholder="Letter">
+                <input type="number" class="letterTotalTotal" placeholder="Total">
+                <button type="button" class="removeButton">-</button>
+            `;
+            letterTotalsInput.appendChild(row);
+        });
+
+        addLetterPositionButton.addEventListener("click", () => {
+            const letterPositionsInput = document.getElementById("letterPositionsInput");
+            const row = document.createElement("div");
+            row.classList.add("letterPositionRow");
+            row.innerHTML = `
+                <input type="text" class="letterPositionLetter" placeholder="Letter">
+                <input type="number" class="letterPositionPosition" placeholder="Position">
+                <button type="button" class="removeButton">-</button>
+            `;
+            letterPositionsInput.appendChild(row);
+        });
+
+        // Eliminar una fila cuando se hace clic en el botón "-"
+        searchForm.addEventListener("click", (e) => {
+            if (e.target.classList.contains("removeButton")) {
+                e.target.parentElement.remove();
+            }
+        });
+
+        searchButton.addEventListener("click", () => {
+            const letters = document.getElementById("letters").value;
+            const length = document.getElementById("length").value;
+            const letterTotalRows = document.querySelectorAll(".letterTotalRow");
+            const letterPositionRows = document.querySelectorAll(".letterPositionRow");
+
+            const requestBody = {
+                letters,
+                length
+            };
+
+            if (letterTotalRows.length > 0) {
+                requestBody.letterTotals = [];
+                letterTotalRows.forEach(row => {
+                    const letter = row.querySelector(".letterTotalLetter").value;
+                    const total = row.querySelector(".letterTotalTotal").value;
+                    requestBody.letterTotals.push({ letter, total: Number(total) });
+                });
+            }
+
+            if (letterPositionRows.length > 0) {
+                requestBody.letterPositions = [];
+                letterPositionRows.forEach(row => {
+                    const letter = row.querySelector(".letterPositionLetter").value;
+                    const position = row.querySelector(".letterPositionPosition").value;
+                    requestBody.letterPositions.push({ letter, position: Number(position) });
+                });
+            }
+
+            fetch("http://localhost:8080/word", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(requestBody)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Limpiar la tabla antes de agregar nuevos resultados
+                while (resultTable.firstChild) {
+                    resultTable.removeChild(resultTable.firstChild);
+                }
+
+                // Agregar los resultados a la tabla
+                data.forEach(word => {
+                    const row = resultTable.insertRow();
+                    const cell = row.insertCell();
+                    cell.innerHTML = word;
+                });
+
+                // Mostrar la tabla de resultados
+                resultTable.style.display = "table";
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        });
+    </script>
+</body>
+</html>
