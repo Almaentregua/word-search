@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Utils {
-    public static char[] quitarLetras(char[] letras, char[] letrasARemover) {
+    public static char[] removeLetters(char[] letters, char[] lettersToRemove) {
         List<Character> listaLetras = new ArrayList<>();
-        for (char letra : letras) {
-            if (!contieneLetra(letra, letrasARemover)) {
+        for (char letra : letters) {
+            if (!containLetter(letra, lettersToRemove)) {
                 listaLetras.add(letra);
             }
         }
@@ -20,9 +20,9 @@ public class Utils {
         return resultado;
     }
 
-    public static boolean contieneLetra(char letra, char[] letrasARemover) {
-        for (char letraARemover : letrasARemover) {
-            if (letra == letraARemover) {
+    public static boolean containLetter(char letter, char[] letters) {
+        for (char letterInLetters : letters) {
+            if (letter == letterInLetters) {
                 return true;
             }
         }

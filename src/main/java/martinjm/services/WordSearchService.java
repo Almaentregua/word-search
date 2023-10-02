@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class WordSearchService {
     public List<String> getWords(WordSearchCriteria wordSearchCriteria){
         String lettersToUse = wordSearchCriteria.getLetters();
-        char[] proibidas = Utils.quitarLetras(WordUtilsService.letters, lettersToUse.toCharArray());
+        char[] proibidas = Utils.removeLetters(WordUtilsService.letters, lettersToUse.toCharArray());
 
         List<String> dictionary = DictionaryService.getDictionay();
 
